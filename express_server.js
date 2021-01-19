@@ -8,6 +8,12 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+// route for urls_new.ejs
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+// // route for app.get("/urls/:id", ...)
+// app.get("/urls/:id", ...)
 
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
