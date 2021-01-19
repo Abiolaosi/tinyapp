@@ -21,10 +21,11 @@ app.get("/hello", (req, res) => {
 
 // Add a new route in express_server.js which we'll use to render this new template
 
-// app.get("/urls/:shortURL", (req, res) => {
-//   const templateVars = { shortURL: req.params.shortURL, longURL:  };
-//   res.render("urls_show", templateVars);
-// });
+app.get("/urls/:shortURL", (req, res) => {
+  let shortURL = req.params.shortURL;
+  const templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL]  };
+  res.render("urls_show", templateVars);
+});
 
 
 
