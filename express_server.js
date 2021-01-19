@@ -4,6 +4,16 @@ const PORT = 8080; // default port 8080
 // add ejs: new line
 app.set("view engine", "ejs");
 
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
+});
+
+app.get("/hello", (req, res) => {
+  const templateVars = { greeting: 'Hello World!' };
+  res.render("hello_world", templateVars);
+});
+
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
