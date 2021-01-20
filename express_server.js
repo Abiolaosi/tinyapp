@@ -24,7 +24,7 @@ app.post("/urls", (req, res) => {
 
 // route: url shortening (part 2)
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[shortURL];
+  const longURL = req.params.shortURL;
   res.redirect(longURL);
 });
 
@@ -53,6 +53,12 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
+
+});
 
 
 app.get("/", (req, res) => {
