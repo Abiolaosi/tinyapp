@@ -49,15 +49,45 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  const templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL]  };
+  const templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL]};
   res.render("urls_show", templateVars);
 });
-
+//route for delete
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect("/urls");
 
+});
+
+// // route for submit
+app.post("/urls/:shortURL/submit", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL]};
+  console.log("text");
+  res.redirect("/urls");
+});
+
+//route for input
+app.post("/urls/:shortURL/input", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL]};
+  res.redirect("/urls")
+
+});
+
+app.post("/urls/:shortURL", (req, res) => {
+  let longURL = req.body.longURL;
+  let shortURL = req.params.shortURL;
+  urlDatabase[shortURL] = longURL;
+
+  // console.log(req.body);
+  // console.log(req.params);
+  // let longURL = req.body.longURL
+  
+  // find the shorturl from database that matches the short url varaible 
+  // replace the longurl form the matching shorturl
+  res.redirect("/urls");
 });
 
 
