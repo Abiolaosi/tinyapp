@@ -5,14 +5,50 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
 
+const cookieParser = require('cookie-parser');
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
+
+
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
+// -----------------------------------------------
+// working on cookies
+// console.log(req.body.username);
+// res.send(req.body);
+
+// route for login
+app.post("/login", (req, res) => {
+res.cookie('username', req.body.username);
+res.redirect("/urls");
+});
+
+//route logout
+app.post("/logout", (req, res) => {
+  res.clearCookie('username');
+  res.redirect("/urls");
+  });
+
+// app.get("/login", (req, res) => {
+//   res.cookie('username', req.cookies["username"]);
+//   res.redirect("/urls");
+//   });
+
+
+
+
+
+
+
+
 // this added after installing body-parser
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
+// const bodyParser = require("body-parser");
+
 
 // making post request
 
@@ -20,6 +56,8 @@ app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
+
+
 
 
 // route: url shortening (part 2)
@@ -36,7 +74,8 @@ app.get("/urls/new", (req, res) => {
 // app.get("/urls/:id", ...)
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  console.log(req.cookies);
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"]};
   res.render("urls_index", templateVars);
 });
 
@@ -103,6 +142,14 @@ app.listen(PORT, () => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+
+
+
+app.get('/', function (req, res) {
+  res.send('hello world')
+})
+
+app.listen(3000)
 
 
 app.get("/hello", (req, res) => {
