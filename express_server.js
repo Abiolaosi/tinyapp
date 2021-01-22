@@ -1,8 +1,10 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const uuid = require('uuid/v4');
 // add ejs: new line
 app.set("view engine", "ejs");
+
 
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
@@ -23,6 +25,31 @@ const users = {
 }
 
 
+// const emailExists = (userDatabase, email) => {
+//   if (userDatabase[email]) {
+//     return true
+//   } else {
+//     return false
+//   }
+// }
+
+// const passwordMatching = (userDatabase, email, password) => {
+//   if (userDatabase[email].password === password) {
+//     return true
+//   } else {
+//     return false
+//   }
+// }
+
+// const fetchUser = (userDatabase, email) => {
+//   if (userDatabase[email]) {
+//     return userDatabase[email]
+//   } else {
+//     return {}
+//   }
+// }
+
+
 // =============================
 // The form should POST to /register.
 
@@ -35,12 +62,23 @@ const urlDatabase = {
 // _________________________________
 
 app.post("/register", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  const userId = generateRandomString();
+  const user = {
+    id: userId,
+    email: req.body.email,
+    password: req.body.password
+    
+  }
+  users[userId] = user;
+  res.cookie("userId", userId);
+  res.redirect("/urls");
+  console.log(users[userId]); // Log the POST request body to the console
+  // res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/register", (req, res) => {
-  res.render("register");
+  const templateVars = {user: null};
+  res.render("register", templateVars);
 });
 
 // -----------------------------------------------
@@ -90,7 +128,9 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls", (req, res) => {
   console.log(req.cookies);
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"]};
+  const user = getUserById(req.cookies["userId"], users)
+  const templateVars = { urls: urlDatabase, user: user};
+  console.log("templateVars", templateVars)
   res.render("urls_index", templateVars);
 });
 
@@ -173,4 +213,15 @@ app.get("/fetch", (req, res) => {
   res.send(`a = ${a}`);
 });
 
-function generateRandomString() {}
+function generateRandomString() {
+   const userId = uuid().substr(0, 8);
+   return userId;
+}
+
+function getUserById(Id, users){
+  for (key in users){
+    if (users[key].id === Id) {
+      return users[key];
+    } 
+  }
+}
