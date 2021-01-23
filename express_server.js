@@ -60,6 +60,42 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
+//working on new login page
+// route for login------------------
+app.get("/login", (req, res) => {
+  const user_id = req.cookies["user_id"];
+  const templateVars = { urls: urlDatabase, user: users[user_id]};
+ // shows a form to login
+  res.render("login", templateVars);
+});
+
+
+app.post("/login", (req, res) => {
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
+  if(passwordMatching(users, req.body.password, req.body.email ))
+  {
+    let user_obj = fetchUser(users,req.body.email)
+    res.cookie("user_id",user_obj.id)
+    console.log(user_obj.id)
+    res.redirect("/urls");
+  }
+  else{
+    console.log('Bad Password or Email');
+    res.redirect("/login")
+  }
+
+});
+
+//route logout
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
+
+
+
+
 // working on register___: route
 app.get("/register", (req, res) => {
   const templateVars = { user: null };
@@ -107,16 +143,12 @@ app.get("/register", (req, res) => {
 // res.send(req.body);
 
 // route for login
-app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
-  res.redirect("/urls");
-});
+// app.post("/login", (req, res) => {
+//   res.cookie("username", req.body.username);
+//   res.redirect("/urls");
+// });
 
-//route logout
-app.post("/logout", (req, res) => {
-  res.clearCookie("username");
-  res.redirect("/urls");
-});
+
 
 // app.get("/login", (req, res) => {
 //   res.cookie('username', req.cookies["username"]);
