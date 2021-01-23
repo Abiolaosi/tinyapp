@@ -1,15 +1,16 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-const uuid = require('uuid/v4');
-// add ejs: new line
-app.set("view engine", "ejs");
-
-
+const uuid = require("uuid/v4");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({ extended: true }));
+
+
+app.set("view engine", "ejs"); // tells express to use ejs as templating
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+// app.use(morgan('dev'));
+
 
 const users = { 
   "userRandomID": {
@@ -25,30 +26,31 @@ const users = {
 }
 
 
-// const emailExists = (userDatabase, email) => {
-//   if (userDatabase[email]) {
-//     return true
-//   } else {
-//     return false
-//   }
-// }
+const emailExists = (userDatabase, email) => {
+  console.log("Database", userDatabase);
+  if (getUserByEmail(email, userDatabase)) {
+    return true
+  } else {
+    return false
+  }
+}
 
-// const passwordMatching = (userDatabase, email, password) => {
-//   if (userDatabase[email].password === password) {
-//     return true
-//   } else {
-//     return false
-//   }
-// }
+const passwordMatching = (userDatabase, email, password) => {
+  if (userDatabase[email].password === password) {
+    return true
+  } else {
+    return false
+  }
 
-// const fetchUser = (userDatabase, email) => {
-//   if (userDatabase[email]) {
-//     return userDatabase[email]
-//   } else {
-//     return {}
-//   }
-// }
+}
 
+const fetchUser = (userDatabase, email) => {
+  if (userDatabase[email]) {
+    return userDatabase[email]
+  } else {
+    return {}
+  }
+}
 
 // =============================
 // The form should POST to /register.
@@ -58,7 +60,12 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
-      // working on register___: route
+// working on register___: route
+app.get("/register", (req, res) => {
+  const templateVars = { user: null };
+  res.render("register", templateVars);
+});
+
 // _________________________________
 
 app.post("/register", (req, res) => {
@@ -66,20 +73,33 @@ app.post("/register", (req, res) => {
   const user = {
     id: userId,
     email: req.body.email,
-    password: req.body.password
+    password: req.body.password,
+  };
+  const incomingEmail = req.body.email;
+  const incomingPassword = req.body.password;
+  if (!incomingEmail || !incomingPassword) {
+    res.statusCode = 400;
+    res.send("incorrect username or password");
+
+    // check if email exit
+}else if (emailExists(users, req.body.email)) {
+    res.send("email already exit");
+  } else {
+    users[userId] = user;
+    res.cookie("userId", userId);
+    res.redirect("/urls");
+    console.log(users[userId]); // Log the POST request body to the console
     
   }
-  users[userId] = user;
-  res.cookie("userId", userId);
-  res.redirect("/urls");
-  console.log(users[userId]); // Log the POST request body to the console
-  // res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/register", (req, res) => {
   const templateVars = {user: null};
   res.render("register", templateVars);
 });
+
+//  this added after installing body-parser
+// const bodyParser = require("body-parser");
 
 // -----------------------------------------------
 // working on cookies
@@ -103,9 +123,6 @@ app.post("/logout", (req, res) => {
 //   res.redirect("/urls");
 //   });
 
-// this added after installing body-parser
-// const bodyParser = require("body-parser");
-
 // making post request
 
 app.post("/urls", (req, res) => {
@@ -119,6 +136,9 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+//route for post request to handle user registration error
+//------------------------------------------
+
 // route for urls_new.ejs
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
@@ -128,9 +148,9 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls", (req, res) => {
   console.log(req.cookies);
-  const user = getUserById(req.cookies["userId"], users)
-  const templateVars = { urls: urlDatabase, user: user};
-  console.log("templateVars", templateVars)
+  const user = getUserById(req.cookies["userId"], users);
+  const templateVars = { urls: urlDatabase, user: user };
+  console.log("templateVars", templateVars);
   res.render("urls_index", templateVars);
 });
 
@@ -173,12 +193,7 @@ app.post("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   urlDatabase[shortURL] = longURL;
 
-  // console.log(req.body);
-  // console.log(req.params);
-  // let longURL = req.body.longURL
-
-  // find the shorturl from database that matches the short url varaible
-  // replace the longurl form the matching shorturl
+  
   res.redirect("/urls");
 });
 
@@ -213,15 +228,24 @@ app.get("/fetch", (req, res) => {
   res.send(`a = ${a}`);
 });
 
+// generates a random id
 function generateRandomString() {
-   const userId = uuid().substr(0, 8);
-   return userId;
+  const userId = uuid().substr(0, 8);
+  return userId;
 }
 
-function getUserById(Id, users){
-  for (key in users){
-    if (users[key].id === Id) {
+function getUserById(Id, users) {
+  for (key in users) {
+    if (users[key].id === Id) {   
       return users[key];
-    } 
+    }
+  }
+}
+
+function getUserByEmail(email, users) {
+  for (key in users) {
+    if (users[key].email === email) {   
+      return users[key];
+    }
   }
 }
